@@ -2,7 +2,7 @@ use std::{
     sync::atomic::{AtomicU32, AtomicU64, Ordering},
     time::Duration,
 };
-
+use libc::{c_long, time_t};
 use crate::{condvar_table, private::AtomicWaitImpl};
 
 impl AtomicWaitImpl for AtomicU32 {
@@ -11,8 +11,8 @@ impl AtomicWaitImpl for AtomicU32 {
     fn wait_timeout(&self, value: Self::AtomicInner, timeout: Option<Duration>) {
         unsafe {
             let wait_timespec = timeout.map(|x| libc::timespec {
-                tv_sec: x.as_secs() as i64,
-                tv_nsec: x.subsec_nanos() as i64,
+                tv_sec: x.as_secs() as time_t,
+                tv_nsec: x.subsec_nanos() as c_long,
             });
 
             libc::syscall(
